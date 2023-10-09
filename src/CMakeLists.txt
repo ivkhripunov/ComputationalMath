@@ -1,0 +1,3 @@
+file(GLOB_RECURSE SOURCE *.h)
+
+add_library(${PROJECT_NAME} INTERFACE ${SOURCE})
