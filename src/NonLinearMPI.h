@@ -59,26 +59,10 @@ localizeRoots(const auto &equationFunc, const Segment &segment, const indexType 
     return result;
 }
 
+[[nodiscard]]
 scalar inline
-dichotomySolver(const auto &equationFunc, const Segment &segment,
+dichotomySolver(const auto &equationFunc, const Segment &initialSegment,
                 const scalar tolerance) noexcept {
-
-    const scalar midPoint = (segment.begin + segment.end) / 2;
-    if (equationFunc(segment.begin) * equationFunc(segment.end) < 0) {
-        if ((segment.end - segment.begin) < tolerance) {
-            exit;
-        } else {
-            dichotomySolver(equationFunc, {segment.begin, midPoint}, tolerance);
-            dichotomySolver(equationFunc, {midPoint, segment.end}, tolerance);
-        }
-    }
-
-    return midPoint;
-}
-
-scalar inline
-dichotomySolverx(const auto &equationFunc, const Segment &initialSegment,
-                 const scalar tolerance) noexcept {
 
     scalar midPoint;
     Segment iterationSegment = initialSegment;
@@ -87,10 +71,10 @@ dichotomySolverx(const auto &equationFunc, const Segment &initialSegment,
 
         midPoint = (iterationSegment.begin + iterationSegment.end) / 2;
 
-        if (equationFunc(midPoint) < tolerance) break;
-        else if (equationFunc(iterationSegment.begin) * equationFunc(iterationSegment.end) < 0) {
+        if (equationFunc(midPoint) * equationFunc(iterationSegment.begin) < 0) {
             iterationSegment.end = midPoint;
-        } else iterationSegment.begin = midPoint;
+        } else { iterationSegment.begin = midPoint; }
+
     }
 
     return midPoint;
