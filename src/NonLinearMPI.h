@@ -5,13 +5,8 @@
 #ifndef COMPUTATIONALMATH_NONLINEARMPI_H
 #define COMPUTATIONALMATH_NONLINEARMPI_H
 
-#include <cmath>
+#include "Utility.h"
 #include <vector>
-#include <Eigen/Dense>
-
-using scalar = double;
-using indexType = std::size_t;
-using Vector2d = Eigen::Vector2d;
 
 struct Segment {
     scalar begin;
