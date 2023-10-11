@@ -21,7 +21,7 @@ TEST(TASK12_8, MPI) {
     const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, segment, pointsCount);
 
     const scalar tolerance = 1e-3;
-    const indexType maxIterationCount = 100;
+    const indexType maxIterationCount = 5;
 
     const auto iterativeFunc1 = [&](const scalar x) {
         return std::exp(x * x - 0.5) / (2 * sqr2);
@@ -51,19 +51,20 @@ TEST(TASK12_8, RELAXATION) {
     };
 
     const Segment segment{0, 5};
-    const indexType pointsCount = 8;
+    const indexType pointsCount = 10;
 
     const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, segment, pointsCount);
 
-    const scalar tolerance = 1e-1;
-    const indexType maxIterationCount = 30;
+    const scalar tolerance = 1e-3;
+    const indexType maxIterationCount = 12;
+    const scalar step1 = 2;
+    const scalar step2 = 2;
 
     const scalar initialGuess1 = localizedRoots[0];
     const scalar initialGuess2 = localizedRoots[1];
 
-    const scalar step = 1e-1;
-    const Result root1 = solveWithRelaxation<true>(equationFunc, initialGuess1, step, maxIterationCount, tolerance);
-    const Result root2 = solveWithRelaxation<false>(equationFunc, initialGuess2, step, maxIterationCount, tolerance);
+    const Result root1 = solveWithRelaxation<true>(equationFunc, initialGuess1, step1, maxIterationCount, tolerance);
+    const Result root2 = solveWithRelaxation<false>(equationFunc, initialGuess2, step2, maxIterationCount, tolerance);
     const scalar referenceRoot1 = 0.226;
     const scalar referenceRoot2 = 1.359;
 
@@ -89,4 +90,37 @@ TEST(TASK12_8, DICHOTOMY) {
 
     ASSERT_NEAR(root1, referenceRoot1, tolerance);
     ASSERT_NEAR(root2, referenceRoot2, tolerance);
+}
+
+TEST(TASK12_8, NEWTON) {
+    const auto equationFunc = [](const scalar x) {
+        return x * std::exp(-x * x) - 1 / (2 * std::sqrt(2 * M_E));
+    };
+
+    const auto derivativeFunc = [](const scalar x) {
+        const scalar xSqr = x * x;
+        return std::exp(-xSqr) * (1 - 2 * xSqr);
+    };
+
+    const Segment segment{0, 5};
+    const indexType pointsCount = 7;
+
+    const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, segment, pointsCount);
+
+    const scalar tolerance = 1e-3;
+    const indexType maxIterationCount = 5;
+
+    const scalar initialGuess1 = localizedRoots[0];
+    const scalar initialGuess2 = localizedRoots[1];
+
+    const scalar step = 1e-1;
+    const Result root1 = solveWithNewton(equationFunc, derivativeFunc, initialGuess1, maxIterationCount, tolerance);
+    const Result root2 = solveWithNewton(equationFunc, derivativeFunc, initialGuess2, maxIterationCount, tolerance);
+    const scalar referenceRoot1 = 0.226;
+    const scalar referenceRoot2 = 1.359;
+
+    ASSERT_TRUE(root1.converged);
+    ASSERT_TRUE(root2.converged);
+    ASSERT_NEAR(root1.value, referenceRoot1, tolerance);
+    ASSERT_NEAR(root2.value, referenceRoot2, tolerance);
 }

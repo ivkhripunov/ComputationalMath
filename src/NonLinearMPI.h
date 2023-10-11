@@ -81,7 +81,7 @@ dichotomySolver(const auto &equationFunc, const Segment &initialSegment,
 }
 
 
-//RHS = 0
+//Обязательно подставляем уже итеративную функцию!!!
 [[nodiscard]]
 Result inline solveWithMPI(const auto &iterativeFunc, const scalar initialGuess, const scalar tolerance,
                            const indexType maxIterationCount) noexcept {
@@ -122,5 +122,25 @@ solveWithRelaxation(const auto &equationFunc, const scalar initialGuess, const s
 
     return {x_new, std::abs(equationFunc(x_new)) < tolerance};
 }
+
+[[nodiscard]]
+Result inline
+solveWithNewton(const auto &equationFunc, const auto &derivativeFunc, const scalar initialGuess,
+                const indexType maxIterationCount, const scalar tolerance) noexcept {
+
+    scalar x_new = initialGuess;
+    indexType counter = 0;
+    const auto iterativeFunc = [&](const scalar x) { return x - equationFunc(x) / derivativeFunc(x); };
+
+
+    while (counter < maxIterationCount) {
+        const scalar x_old = x_new;
+        x_new = iterativeFunc(x_old);
+
+        counter++;
+    }
+
+    return {x_new, std::abs(equationFunc(x_new)) < tolerance};
+};
 
 #endif //COMPUTATIONALMATH_NONLINEARMPI_H
