@@ -26,15 +26,13 @@ calcDerivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noe
     Eigen::Vector<T, N> coeff;
     coeff(derivativeOrder - 1) = factorial(derivativeOrder);
 
-    matrix.row(0) = static_cast<Eigen::Matrix<scalar, N, 1>>(points.data());
-    Vector2d row0 = matrix.row(0).transpose();
+    matrix.col(0) = static_cast<Eigen::Matrix<scalar, N, 1>>(points.data());
 
-    //to be improved
     for (std::size_t i = 1; i < N; i++) {
-        matrix.row(i) = (matrix.row(i - 1).asDiagonal()) * row0;
+        matrix.col(i) = (matrix.col(i - 1).asDiagonal()) * matrix.col(0);
     }
 
-    const Eigen::Vector<T, N> otherCoeff = matrix.colPivHouseholderQr().solve(coeff);
+    const Eigen::Vector<T, N> otherCoeff = matrix.transpose().colPivHouseholderQr().solve(coeff);
     const T central = -otherCoeff.sum();
 
     std::array<scalar, N> otherArray;
