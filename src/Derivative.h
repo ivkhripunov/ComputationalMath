@@ -8,7 +8,6 @@
 #include "Utility.h"
 #include <array>
 
-
 [[nodiscard]] constexpr indexType factorial(indexType n) noexcept {
     return n > 0 ? n * factorial(n - 1) : 1;
 }
@@ -19,7 +18,19 @@ struct calcDerivativeCoeff {
     std::array<T, N> otherPointsCoeff;
 };
 
+template<typename T, int N>
+[[nodiscard]]
+std::array<T, N> convertVectorToArray(const Eigen::Vector<T, N> &vector) noexcept {
+    std::array<T, N> result;
+
+    for (indexType i = 0; i < N; ++i) {
+        result[i] = vector[i];
+    }
+    return result;
+}
+
 template<typename T, indexType N, indexType derivativeOrder>
+[[nodiscard]]
 calcDerivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noexcept {
     Eigen::Matrix<T, N, N> matrix;
 
@@ -32,15 +43,9 @@ calcDerivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noe
         matrix.col(i) = (matrix.col(i - 1).asDiagonal()) * matrix.col(0);
     }
 
-    const Eigen::Vector<T, N> otherCoeff = matrix.transpose().colPivHouseholderQr().solve(coeff);
-    const T central = -otherCoeff.sum();
+    const Eigen::Vector<T, N> otherPointsCoeff = matrix.transpose().colPivHouseholderQr().solve(coeff);
 
-    std::array<scalar, N> otherArray;
-    for (std::size_t i = 0; i < N; i++) {
-        otherArray[i] = otherCoeff(i);
-    }
-
-    return {central, otherArray};
+    return {-otherPointsCoeff.sum(), convertVectorToArray(otherPointsCoeff)};
 }
 
 #endif //COMPUTATIONALMATH_DERIVATIVE_H
