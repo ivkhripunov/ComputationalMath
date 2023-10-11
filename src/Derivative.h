@@ -29,21 +29,29 @@ std::array<T, N> convertVectorToArray(const Eigen::Vector<T, N> &vector) noexcep
     return result;
 }
 
+template<typename T, indexType N>
+[[nodiscard]]
+Eigen::Matrix<T, N, N> fillMatrix(const std::array<T, N> &points) noexcept {
+
+    Eigen::Matrix<T, N, N> result;
+
+    result.col(0) = static_cast<Eigen::Matrix<scalar, N, 1>>(points.data());
+
+    for (std::size_t i = 1; i < N; i++) {
+        result.col(i) = (result.col(i - 1).asDiagonal()) * result.col(0);
+    }
+
+    return result.transpose();
+}
+
 template<typename T, indexType N, indexType derivativeOrder>
 [[nodiscard]]
 calcDerivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noexcept {
-    Eigen::Matrix<T, N, N> matrix;
 
     Eigen::Vector<T, N> coeff;
     coeff(derivativeOrder - 1) = factorial(derivativeOrder);
 
-    matrix.col(0) = static_cast<Eigen::Matrix<scalar, N, 1>>(points.data());
-
-    for (std::size_t i = 1; i < N; i++) {
-        matrix.col(i) = (matrix.col(i - 1).asDiagonal()) * matrix.col(0);
-    }
-
-    const Eigen::Vector<T, N> otherPointsCoeff = matrix.transpose().colPivHouseholderQr().solve(coeff);
+    const Eigen::Vector<T, N> otherPointsCoeff = fillMatrix(points).colPivHouseholderQr().solve(coeff);
 
     return {-otherPointsCoeff.sum(), convertVectorToArray(otherPointsCoeff)};
 }
