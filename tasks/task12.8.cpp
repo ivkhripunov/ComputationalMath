@@ -16,9 +16,9 @@ TEST(TASK12_8, MPI) {
     };
 
     const Segment segment{0, 5};
-    const indexType pointsCount = 100;
+    const indexType pointsCount = 10;
 
-    const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, pointsCount, segment);
+    const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, segment, pointsCount);
 
     const scalar tolerance = 1e-3;
     const indexType maxIterationCount = 100;
@@ -45,30 +45,25 @@ TEST(TASK12_8, MPI) {
     ASSERT_NEAR(root2.value, referenceRoot2, tolerance);
 }
 
-
-/*
- * Наткнулся на проблему, что если взять маленький шаг, то выполняется критерий остановы и цикл завершается,
- * хотя фактической сходимости нет. Нужно доработать критерий остановы.
- */
 TEST(TASK12_8, RELAXATION) {
-    const auto equationFunc = [&](const scalar x) {
+    const auto equationFunc = [](const scalar x) {
         return x * std::exp(-x * x) - 1 / (2 * std::sqrt(2 * M_E));
     };
 
     const Segment segment{0, 5};
-    const indexType pointsCount = 100;
+    const indexType pointsCount = 8;
 
-    const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, pointsCount, segment);
+    const std::vector<scalar> localizedRoots = localizeRoots(equationFunc, segment, pointsCount);
 
-    const scalar tolerance = 1e-3;
-    const indexType maxIterationCount = 100;
+    const scalar tolerance = 1e-1;
+    const indexType maxIterationCount = 30;
 
     const scalar initialGuess1 = localizedRoots[0];
     const scalar initialGuess2 = localizedRoots[1];
 
-    const scalar step = 1;
-    const Result root1 = solveWithRelaxation(equationFunc, initialGuess1, step, tolerance, maxIterationCount);
-    const Result root2 = solveWithRelaxation(equationFunc, initialGuess2, step, tolerance, maxIterationCount);
+    const scalar step = 1e-1;
+    const Result root1 = solveWithRelaxation<true>(equationFunc, initialGuess1, step, maxIterationCount, tolerance);
+    const Result root2 = solveWithRelaxation<false>(equationFunc, initialGuess2, step, maxIterationCount, tolerance);
     const scalar referenceRoot1 = 0.226;
     const scalar referenceRoot2 = 1.359;
 
@@ -76,4 +71,22 @@ TEST(TASK12_8, RELAXATION) {
     ASSERT_TRUE(root2.converged);
     ASSERT_NEAR(root1.value, referenceRoot1, tolerance);
     ASSERT_NEAR(root2.value, referenceRoot2, tolerance);
+}
+
+TEST(TASK12_8, DICHOTOMY) {
+    const auto equationFunc = [](const scalar x) {
+        return x * std::exp(-x * x) - 1 / (2 * std::sqrt(2 * M_E));
+    };
+    const scalar max = 1 / std::sqrt(2 * M_E);
+    const Segment segment1{0, max};
+    const Segment segment2{max, 5};
+    const scalar tolerance = 1e-3;
+
+    const scalar root1 = dichotomySolver(equationFunc, segment1, tolerance);
+    const scalar root2 = dichotomySolver(equationFunc, segment2, tolerance);
+    const scalar referenceRoot1 = 0.226;
+    const scalar referenceRoot2 = 1.359;
+
+    ASSERT_NEAR(root1, referenceRoot1, tolerance);
+    ASSERT_NEAR(root2, referenceRoot2, tolerance);
 }

@@ -38,16 +38,16 @@ std::vector<scalar> inline calcGrid(const indexType pointsCount, const Segment &
 
 //TODO: add localization with tolerance
 [[nodiscard]]
-std::vector<scalar> inline
-localizeRoots(const auto &func, const indexType pointsCount, const Segment &segment) noexcept {
+std::vector<scalar>
+localizeRoots(const auto &equationFunc, const Segment &segment, const indexType pointsCount) noexcept {
 
     std::vector<scalar> result;
     const std::vector<scalar> grid = calcGrid(pointsCount, segment);
-    scalar valueInPointOld = func(grid[0]);
+    scalar valueInPointOld = equationFunc(grid[0]);
 
     for (indexType i = 0; i < pointsCount - 1; ++i) {
 
-        const scalar valueInPointNew = func(grid[i + 1]);
+        const scalar valueInPointNew = equationFunc(grid[i + 1]);
 
         if (valueInPointOld * valueInPointNew <= 0) {
             result.push_back((grid[i] + grid[i + 1]) / 2);
@@ -58,6 +58,44 @@ localizeRoots(const auto &func, const indexType pointsCount, const Segment &segm
 
     return result;
 }
+
+scalar inline
+dichotomySolver(const auto &equationFunc, const Segment &segment,
+                const scalar tolerance) noexcept {
+
+    const scalar midPoint = (segment.begin + segment.end) / 2;
+    if (equationFunc(segment.begin) * equationFunc(segment.end) < 0) {
+        if ((segment.end - segment.begin) < tolerance) {
+            exit;
+        } else {
+            dichotomySolver(equationFunc, {segment.begin, midPoint}, tolerance);
+            dichotomySolver(equationFunc, {midPoint, segment.end}, tolerance);
+        }
+    }
+
+    return midPoint;
+}
+
+scalar inline
+dichotomySolverx(const auto &equationFunc, const Segment &initialSegment,
+                 const scalar tolerance) noexcept {
+
+    scalar midPoint;
+    Segment iterationSegment = initialSegment;
+
+    while (iterationSegment.end - iterationSegment.begin >= tolerance) {
+
+        midPoint = (iterationSegment.begin + iterationSegment.end) / 2;
+
+        if (equationFunc(midPoint) < tolerance) break;
+        else if (equationFunc(iterationSegment.begin) * equationFunc(iterationSegment.end) < 0) {
+            iterationSegment.end = midPoint;
+        } else iterationSegment.begin = midPoint;
+    }
+
+    return midPoint;
+}
+
 
 //RHS = 0
 [[nodiscard]]
@@ -79,29 +117,26 @@ Result inline solveWithMPI(const auto &iterativeFunc, const scalar initialGuess,
     return {x_new, counter < maxIterationCount};
 }
 
-//TODO: fix relaxation
+template<bool positiveDerivative>
 [[nodiscard]]
 Result inline
-solveWithRelaxation(const auto &equationFunc, const scalar initialGuess, const scalar step, const scalar tolerance,
-                    const indexType maxIterationCount) noexcept {
+solveWithRelaxation(const auto &equationFunc, const scalar initialGuess, const scalar step,
+                    const indexType maxIterationCount, const scalar tolerance) noexcept {
 
+    const scalar sign = positiveDerivative ? -1 : 1;
     scalar x_new = initialGuess;
     indexType counter = 0;
-    bool continueCriteria = true;
 
-    const auto iterativeFunc = [&](const scalar x) { return step * equationFunc(x) + x; };
+    const auto iterativeFunc = [&](const scalar x) { return sign * step * equationFunc(x) + x; };
 
-    while (continueCriteria) {
+    while (counter < maxIterationCount) {
         const scalar x_old = x_new;
         x_new = iterativeFunc(x_old);
 
-        std::cout << x_old << " " << x_new - x_old << std::endl;
-
         counter++;
-        continueCriteria = (counter < maxIterationCount) && (std::abs(x_new - x_old) > tolerance);
     }
 
-    return {x_new, counter < maxIterationCount};
+    return {x_new, std::abs(equationFunc(x_new)) < tolerance};
 }
 
 #endif //COMPUTATIONALMATH_NONLINEARMPI_H
