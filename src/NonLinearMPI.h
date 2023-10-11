@@ -7,9 +7,11 @@
 
 #include <cmath>
 #include <vector>
+#include <Eigen/Dense>
 
 using scalar = double;
 using indexType = std::size_t;
+using Vector2d = Eigen::Vector2d;
 
 struct Segment {
     scalar begin;
@@ -18,6 +20,11 @@ struct Segment {
 
 struct Result {
     scalar value;
+    bool converged;
+};
+
+struct ResultVector {
+    Vector2d value;
     bool converged;
 };
 
@@ -101,6 +108,27 @@ Result inline solveWithMPI(const auto &iterativeFunc, const scalar initialGuess,
     return {x_new, counter < maxIterationCount};
 }
 
+//Обязательно подставляем уже итеративную функцию!!!
+[[nodiscard]]
+ResultVector inline solveVectorWithMPI(const auto &iterativeFunc, Vector2d initialGuess,
+                                       const scalar tolerance,
+                                       const indexType maxIterationCount) noexcept {
+
+    Vector2d x_new = initialGuess;
+    indexType counter = 0;
+    bool continueCriteria = true;
+
+    while (continueCriteria) {
+        const Vector2d x_old = x_new;
+        x_new = iterativeFunc(x_old);
+
+        counter++;
+        continueCriteria = (counter < maxIterationCount) && ((x_new - x_old).norm() > tolerance);
+    }
+
+    return {x_new, counter < maxIterationCount};
+}
+
 template<bool positiveDerivative>
 [[nodiscard]]
 Result inline
@@ -141,6 +169,28 @@ solveWithNewton(const auto &equationFunc, const auto &derivativeFunc, const scal
     }
 
     return {x_new, std::abs(equationFunc(x_new)) < tolerance};
-};
+}
+
+[[nodiscard]]
+ResultVector inline solveVectorWithNewton(const auto &equationFunc, const auto &Jacobi, Vector2d initialGuess,
+                                          const scalar tolerance,
+                                          const indexType maxIterationCount) noexcept {
+
+    Vector2d x_new = initialGuess;
+    indexType counter = 0;
+    bool continueCriteria = true;
+
+    while (continueCriteria) {
+        const Vector2d x_old = x_new;
+        const Eigen::Matrix<scalar, 2, 2> jacobi = Jacobi(x_old);
+        const Eigen::Matrix<scalar, 2, 2> jacobiInv = jacobi.inverse();
+        x_new = x_old - jacobiInv * equationFunc(x_old);
+
+        counter++;
+        continueCriteria = (counter < maxIterationCount) && ((x_new - x_old).norm() > tolerance);
+    }
+
+    return {x_new, counter < maxIterationCount};
+}
 
 #endif //COMPUTATIONALMATH_NONLINEARMPI_H

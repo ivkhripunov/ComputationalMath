@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include "NonLinearMPI.h"
-
 /*
  * Замечание: для одной функции phi при разных начальных приближениях МПИ все равно сходится к одному из корней (а не к другому).
  * Чтобы найти другой корень, необходимо выразить х другим способом.
@@ -113,7 +112,6 @@ TEST(TASK12_8, NEWTON) {
     const scalar initialGuess1 = localizedRoots[0];
     const scalar initialGuess2 = localizedRoots[1];
 
-    const scalar step = 1e-1;
     const Result root1 = solveWithNewton(equationFunc, derivativeFunc, initialGuess1, maxIterationCount, tolerance);
     const Result root2 = solveWithNewton(equationFunc, derivativeFunc, initialGuess2, maxIterationCount, tolerance);
     const scalar referenceRoot1 = 0.226;
