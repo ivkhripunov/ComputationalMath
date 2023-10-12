@@ -5,13 +5,8 @@
 #ifndef COMPUTATIONALMATH_NONLINEARMPI_H
 #define COMPUTATIONALMATH_NONLINEARMPI_H
 
-#include "Utility.h"
 #include <vector>
-
-struct Segment {
-    scalar begin;
-    scalar end;
-};
+#include "Utility.h"
 
 struct Result {
     scalar value;
