@@ -31,7 +31,7 @@ template<indexType N>
 [[nodiscard]]
 constexpr
 std::array<scalar, N>
-transformChebyshevRootsCustomSegment(const std::array<scalar, N> &rootsDefaultSegment,
+transformToCustomSegment(const std::array<scalar, N> &rootsDefaultSegment,
                                      const Segment &segment) noexcept {
 
     const scalar aPlusBhalf = (segment.begin + segment.end) / 2;
@@ -46,6 +46,7 @@ transformChebyshevRootsCustomSegment(const std::array<scalar, N> &rootsDefaultSe
     for (indexType i = 0; i < N; ++i) {
         result[i] = transformRoot(rootsDefaultSegment[i]);
     }
+
     return result;
 }
 
@@ -55,7 +56,7 @@ constexpr
 std::array<scalar, N>
 calcChebyshevRootsCustomSegment(const Segment &segment) noexcept {
 
-    return transformChebyshevRootsCustomSegment(calcChebyshevRootsDefaultSegment<N>(), segment);
+    return transformToCustomSegment(calcChebyshevRootsDefaultSegment<N>(), segment);
 }
 
 #endif //COMPUTATIONALMATH_CHEBYSHEV_H

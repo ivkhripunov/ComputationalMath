@@ -13,7 +13,7 @@
 }
 
 template<typename T, indexType N>
-struct calcDerivativeCoeff {
+struct derivativeCoeff {
     T centralPointCoeff;
     std::array<T, N> otherPointsCoeff;
 };
@@ -46,7 +46,7 @@ Eigen::Matrix<T, N, N> fillMatrix(const std::array<T, N> &points) noexcept {
 
 template<typename T, indexType N, indexType derivativeOrder>
 [[nodiscard]]
-calcDerivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noexcept {
+derivativeCoeff<T, N> calcDerivativeCoef(const std::array<T, N> &points) noexcept {
 
     Eigen::Vector<T, N> coeff;
     coeff(derivativeOrder - 1) = factorial(derivativeOrder);

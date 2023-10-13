@@ -24,6 +24,8 @@ public:
                         (dividedDifferences_[j] - dividedDifferences_[j - 1]) / (xPoints[j] - xPoints[j - 1 - i]);
             }
         }
+
+        std::cout << dividedDifferences_ << std::endl;
     };
 
     [[nodiscard]]
