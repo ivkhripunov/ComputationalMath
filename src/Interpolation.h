@@ -25,7 +25,7 @@ public:
             }
         }
 
-        std::cout << dividedDifferences_ << std::endl;
+        std::cout << dividedDifferences_ << std::endl << xPoints_ << std::endl;
     };
 
     [[nodiscard]]

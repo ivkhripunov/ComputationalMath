@@ -18,21 +18,6 @@ struct ResultVector {
     bool converged;
 };
 
-[[nodiscard]]
-std::vector<scalar> inline calcGrid(const indexType pointsCount, const Segment &segment) {
-
-    const auto gridSegmentCount = static_cast<scalar>(pointsCount - 1);
-    const scalar step = (segment.end - segment.begin) / gridSegmentCount;
-
-    std::vector<scalar> grid(pointsCount);
-
-    for (indexType i = 0; i < pointsCount; ++i) {
-        grid[i] = segment.begin + static_cast<scalar>(i) * step;
-    }
-
-    return grid;
-}
-
 //TODO: add localization with tolerance
 [[nodiscard]]
 std::vector<scalar>
