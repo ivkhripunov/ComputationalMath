@@ -30,4 +30,14 @@ std::ostream& operator<<(std::ostream& os, const std::array<T, N>& arr) {
     return os;
 }
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+    os << "[ ";
+    for (const auto& element : vec) {
+        os << element << " ";
+    }
+    os << "]";
+    return os;
+}
+
 #endif //COMPUTATIONALMATH_UTILITY_H
