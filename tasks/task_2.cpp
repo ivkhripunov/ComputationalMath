@@ -2,9 +2,11 @@
 // Created by ivankhripunov on 17.10.23.
 //
 
+#include <fstream>
 #include <gtest/gtest.h>
 #include "Integrate.h"
 #include "Interpolation.h"
+
 
 TEST(TASK2, TRAPSIMPGAUSS) {
 
@@ -145,20 +147,68 @@ TEST(TASK2, WITHINTERP) {
 }
 
 TEST(TASK2, GAUSS) {
+    std::ofstream myfile("/home/ivankhripunov/CLionProjects/computationalMath/tasks/task2Gauss.txt", std::ios::trunc);
 
     const auto function = [](const scalar x) { return std::sin(100 * x) * std::exp(-x * x) * std::cos(2 * x); };
 
     const Segment segment = {0, 3};
 
-    const indexType N0 = 500;
-    const std::vector<scalar> grid0 = calcGrid(N0, segment);
+    const scalar referenceResult = 0.010006097860332;
 
-    scalar result = 0;
-    for (indexType i = 0; i < N0 - 1; ++i) {
-        result += integrateSegmentGauss(function, {grid0[i], grid0[i + 1]});
+    for (indexType N = 50; N < 5000; N += 10) {
+
+        const std::vector<scalar> grid0 = calcGrid(N, segment);
+
+        scalar result = 0;
+        for (indexType i = 0; i < N - 1; ++i) {
+            result += integrateSegmentGauss(function, {grid0[i], grid0[i + 1]});
+        }
+
+        myfile << std::abs(result - referenceResult) / referenceResult << std::endl;
     }
 
-    std::cout << result;
+    myfile.close();
+}
 
+TEST(TASK2, TRAPECIA) {
+    std::ofstream myfile("/home/ivankhripunov/CLionProjects/computationalMath/tasks/task2Trapecia.txt", std::ios::trunc);
+
+    const auto function = [](const scalar x) { return std::sin(100 * x) * std::exp(-x * x) * std::cos(2 * x); };
+
+    const Segment segment = {0, 3};
+
+    const scalar referenceResult = 0.010006097860332;
+
+    for (indexType N = 50; N < 10000; N += 10) {
+
+        const std::vector<scalar> grid0 = calcGrid(N, segment);
+
+        const scalar result = integrateGridTrapecia(function, grid0);
+
+        myfile << std::abs(result - referenceResult) / referenceResult << std::endl;
+    }
+
+    myfile.close();
+}
+
+TEST(TASK2, SIMPSON) {
+    std::ofstream myfile("/home/ivankhripunov/CLionProjects/computationalMath/tasks/task2Simpson.txt", std::ios::trunc);
+
+    const auto function = [](const scalar x) { return std::sin(100 * x) * std::exp(-x * x) * std::cos(2 * x); };
+
+    const Segment segment = {0, 3};
+
+    const scalar referenceResult = 0.010006097860332;
+
+    for (indexType N = 50; N < 10000; N += 10) {
+
+        const std::vector<scalar> grid0 = calcGrid(N, segment);
+
+        const scalar result = integrateGridSimpson(function, grid0);
+
+        myfile << std::abs(result - referenceResult) / referenceResult << std::endl;
+    }
+
+    myfile.close();
 }
 
