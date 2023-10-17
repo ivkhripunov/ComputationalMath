@@ -102,7 +102,7 @@ TEST(TASK2, TRAPSIMPGAUSS) {
 
 }
 
-TEST(TASK2, IMPROVEMENT) {
+TEST(TASK2, WITHINTERP) {
 
     const auto functionForInterpolation = [](const scalar x) { return std::exp(-x * x); };
 
@@ -142,5 +142,23 @@ TEST(TASK2, IMPROVEMENT) {
 
     std::cout << "Значение интеграла:" << std::endl;
     std::cout << integral(3) - integral(0);
+}
+
+TEST(TASK2, GAUSS) {
+
+    const auto function = [](const scalar x) { return std::sin(100 * x) * std::exp(-x * x) * std::cos(2 * x); };
+
+    const Segment segment = {0, 3};
+
+    const indexType N0 = 500;
+    const std::vector<scalar> grid0 = calcGrid(N0, segment);
+
+    scalar result = 0;
+    for (indexType i = 0; i < N0 - 1; ++i) {
+        result += integrateSegmentGauss(function, {grid0[i], grid0[i + 1]});
+    }
+
+    std::cout << result;
+
 }
 

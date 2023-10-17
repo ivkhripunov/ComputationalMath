@@ -48,6 +48,13 @@ integrateGridSimpson(const auto &function, const std::vector<T> &grid) noexcept 
 [[nodiscard]] scalar
 integrateSegmentGauss(const auto &function, const Segment segment) noexcept {
 
+    const scalar aPlusBhalf = (segment.begin + segment.end) / 2;
+    const scalar aMinusBhalf = (segment.end - segment.begin) / 2;
+    const auto &transformPoint = [&](const scalar root) {
+
+        return aPlusBhalf + aMinusBhalf * root;
+    };
+
     const indexType N = 3;
     const scalar sqr = std::sqrt(0.6);
     const std::array<scalar, N> points = transformToCustomSegment<3>({-sqr, 0, sqr}, segment);
@@ -55,7 +62,7 @@ integrateSegmentGauss(const auto &function, const Segment segment) noexcept {
 
     scalar result = 0;
     for (indexType i = 0; i < N; ++i) {
-        result += function(points[i]) * weights[i];
+        result += function(points[i]) * weights[i] * aMinusBhalf;
     }
 
     return result;
