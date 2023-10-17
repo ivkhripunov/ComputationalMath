@@ -168,4 +168,24 @@ ResultVector inline solveVectorWithNewton(const auto &equationFunc, const auto &
     return {x_new, counter < maxIterationCount};
 }
 
+[[nodiscard]]
+ResultVector inline
+solveVectorWithRelaxation(const auto &equationFunc, const Vector2d &initialGuess, const scalar step,
+                    const indexType maxIterationCount, const scalar tolerance) noexcept {
+
+    Vector2d x_new = initialGuess;
+    indexType counter = 0;
+
+    const auto iterativeFunc = [&](const Vector2d x) { return step * equationFunc(x) + x; };
+
+    while (counter < maxIterationCount) {
+        const Vector2d x_old = x_new;
+        x_new = iterativeFunc(x_old);
+
+        counter++;
+    }
+
+    return {x_new, equationFunc(x_new).norm() < tolerance};
+}
+
 #endif //COMPUTATIONALMATH_NONLINEARMPI_H
