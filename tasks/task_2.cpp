@@ -75,6 +75,19 @@ TEST(TASK2, TRAPSIMPGAUSS) {
     const scalar resultSimpson500_rich = resultSimpson500 - epsSimpson500;
     const scalar resultSimpson1000_rich = resultSimpson1000 - epsSimpson1000;
 
+    std::cout << std::endl << "Главный член ошибки по правилу Рунге:  " << std::endl;
+
+    std::cout << std::endl << "#Grid 500 points:" << std::endl;
+
+    std::cout << "Трапеция: " << epsTrapecia500 << std::endl << "Симпсон: " << epsSimpson500 << " "
+              << std::endl;
+
+    std::cout << std::endl << "#Grid 1000 points:" << std::endl;
+
+    std::cout << "Трапеция: " << epsTrapecia1000 << std::endl << "Симпсон: " << epsSimpson1000 << " "
+              << std::endl;
+
+    /*******************************/
     std::cout << std::endl << "После экстраполяции Ричардсона: " << std::endl;
 
     std::cout << std::endl << "#Grid 500 points:" << std::endl;
